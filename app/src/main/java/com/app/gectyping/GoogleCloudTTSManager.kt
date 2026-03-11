@@ -220,7 +220,7 @@ object GoogleCloudTTSManager {
 
         // Защита от двойного воспроизведения: если то же слово запрошено менее чем через 600ms — игнорируем
         val now = System.currentTimeMillis()
-        if (clean == lastSpokenText && !slow && (now - lastSpeakTime) < 600L) {
+        if (clean == lastSpokenText && !slow && (now - lastSpeakTime) < 1200L) {
             Log.d(TAG, "Duplicate speak() ignored for \"$clean\" (${now - lastSpeakTime}ms ago)")
             return
         }
@@ -233,6 +233,7 @@ object GoogleCloudTTSManager {
 
         activeSpeakJob?.cancel()
         activeSpeakJob = null
+        stopMediaOnly() // always kill any in-flight audio before starting new word
 
         if (cached.exists() && cached.length() > 0) {
             Log.d(TAG, "Cache hit [slow=$slow]: \"$clean\"")

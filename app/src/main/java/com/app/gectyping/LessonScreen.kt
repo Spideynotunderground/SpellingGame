@@ -222,6 +222,15 @@ fun LessonScreen(
     val onSpeakStable: (String) -> Unit = remember { { word ->
         GoogleCloudTTSManager.speak(word, slow = false)
     }}
+
+    // Single centralized auto-speak — fires exactly once per exercise change.
+    // Individual exercises do NOT have their own speak LaunchedEffect.
+    val currentExerciseForSpeak = exercises.getOrNull(currentExerciseIndex)
+    LaunchedEffect(currentExerciseIndex) {
+        val word = currentExerciseForSpeak?.word?.english ?: return@LaunchedEffect
+        kotlinx.coroutines.delay(350)
+        onSpeakStable(word)
+    }
     
     fun onAnswer(correct: Boolean) {
         isCorrect = correct
@@ -375,8 +384,7 @@ private fun IntroductionExercise(
     val colors = LocalGameColors.current
     
     // exerciseIndex гарантирует уникальный ключ даже если то же слово встречается в другом упражнении
-    val currentOnSpeak by rememberUpdatedState(onSpeak)
-    LaunchedEffect(exerciseIndex) { delay(400); currentOnSpeak() }
+    // Speak is handled centrally in LessonScreen — no per-exercise LaunchedEffect needed
     
     // Убираем бесполезную spring-анимацию (targetValue=1f с самого начала = нет эффекта, только CPU)
 
@@ -588,8 +596,8 @@ private fun SpellWordExercise(
     val focusManager = LocalFocusManager.current
     var input by remember { mutableStateOf("") }
     
-    val currentOnSpeak by rememberUpdatedState(onSpeak)
-    LaunchedEffect(exerciseIndex) { input = ""; delay(400); currentOnSpeak() }
+    // Speak is handled centrally in LessonScreen — no per-exercise LaunchedEffect needed
+    LaunchedEffect(exerciseIndex) { input = "" }
     
     Column(
         modifier = Modifier

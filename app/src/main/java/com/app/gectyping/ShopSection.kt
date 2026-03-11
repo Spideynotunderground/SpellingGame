@@ -106,7 +106,7 @@ fun ShopSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ShopTab("Avatars", Icons.Default.Person, ShopCategory.AVATARS, selectedCategory) { selectedCategory = it }
-            ShopTab("Skins", Icons.Default.Palette, ShopCategory.THEMES, selectedCategory) { selectedCategory = it }
+            ShopTab("Themes", Icons.Default.Palette, ShopCategory.THEMES, selectedCategory) { selectedCategory = it }
             ShopTab("Lives", Icons.Default.Favorite, ShopCategory.LIVES, selectedCategory) { selectedCategory = it }
             ShopTab("Music", Icons.Default.MusicNote, ShopCategory.MUSIC, selectedCategory) { selectedCategory = it }
         }
@@ -393,6 +393,34 @@ private fun MusicGrid(
     onStopPreview: () -> Unit
 ) {
     val colors = LocalGameColors.current
+
+    if (tracks.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text("🎵", fontSize = 48.sp)
+                Text(
+                    text = "Coming Soon…",
+                    color = colors.textPrimary,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "New tracks will be added soon.",
+                    color = colors.textSecondary,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        return
+    }
+
     var previewingId by remember { mutableStateOf<String?>(null) }
 
     LazyVerticalGrid(

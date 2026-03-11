@@ -197,7 +197,8 @@ fun MainMenuScreen(
                 if (tab != NavTab.HOME) showRewardsScreen = false
                 selectedTab = tab
             },
-            modifier = Modifier.padding(bottom = navigationBarHeightDp.dp)
+            modifier = Modifier.padding(bottom = navigationBarHeightDp.dp),
+            hasRewardBadge = hasUnclaimedRewards
         )
     }
 }

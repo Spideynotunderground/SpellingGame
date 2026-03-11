@@ -27,8 +27,7 @@ data class MusicTrackItem(
     val iconRes: Int? = null
 )
 
-val MUSIC_TRACKS = listOf(
-    MusicTrackItem("ambient_drift",  "Ambient Drift",   "🎵", "Soft evolving pads",           60,  R.drawable.icons8_undertale_heart_96),
+val MUSIC_TRACKS = emptyList<MusicTrackItem>()
     MusicTrackItem("lofi_study",     "Lo-Fi Study",     "📚", "Warm mellow lo-fi beats",      80,  R.drawable.icons8_books_96),
     MusicTrackItem("ocean_calm",     "Ocean Calm",      "🌊", "Slow waves & deep tones",      80,  R.drawable.icons8_sail_boat_96),
     MusicTrackItem("forest_rain",    "Forest Rain",     "🌳", "Gentle tremolo & nature feel", 100, R.drawable.icons8_oak_tree_96),

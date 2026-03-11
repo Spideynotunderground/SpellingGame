@@ -2,6 +2,8 @@ package com.app.gectyping
 
 import android.content.Context
 import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -450,7 +452,8 @@ private fun TopicHeader(
 }
 
 /**
- * Individual lesson circle with Duolingo style
+ * Individual lesson circle — redesigned with pastel gradients, glow rings,
+ * bounce-on-press, and smooth entrance animation.
  */
 @Composable
 private fun LessonCircle(
@@ -464,132 +467,175 @@ private fun LessonCircle(
 ) {
     val colors = LocalGameColors.current
     val topicColor = Color(topic.color)
-    
-    // Pulse animation for current lesson
+
+    // ── Pulse glow ring for active lesson ────────────────────────────────────
     val infiniteTransition = rememberInfiniteTransition(label = "lessonPulse")
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = if (isCurrent) 1.08f else 1f,
+    val glowScale by infiniteTransition.animateFloat(
+        initialValue = 1.00f,
+        targetValue  = if (isCurrent) 1.22f else 1.00f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
+            animation  = tween(950, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "pulse"
+        label = "glowScale"
     )
-    
     val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = if (isCurrent) 0.7f else 0.3f,
+        initialValue = 0f,
+        targetValue  = if (isCurrent) 0.38f else 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
+            animation  = tween(950, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "glow"
+        label = "glowAlpha"
     )
-    
+
+    // ── Bounce on press ───────────────────────────────────────────────────────
+    var pressed by remember { mutableStateOf(false) }
+    val pressScale by animateFloatAsState(
+        targetValue    = if (pressed) 0.90f else 1.00f,
+        animationSpec  = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label          = "press"
+    )
+
+    // ── Pastel fill color ─────────────────────────────────────────────────────
+    val fillBrush = when {
+        isCompleted -> Brush.radialGradient(listOf(
+            topicColor.copy(alpha = 0.95f),
+            topicColor.copy(alpha = 0.75f)
+        ))
+        isCurrent   -> Brush.radialGradient(listOf(
+            topicColor,
+            topicColor.copy(alpha = 0.80f)
+        ))
+        isUnlocked  -> Brush.radialGradient(listOf(
+            topicColor.copy(alpha = 0.18f),
+            topicColor.copy(alpha = 0.06f)
+        ))
+        else        -> Brush.radialGradient(listOf(
+            colors.textSecondary.copy(alpha = 0.14f),
+            colors.textSecondary.copy(alpha = 0.07f)
+        ))
+    }
+
     Box(
         modifier = Modifier
             .offset(x = offsetX)
-            .size(80.dp),
+            .size(96.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Glow effect for current lesson
+        // ── Outer animated glow ring ──────────────────────────────────────────
         if (isCurrent) {
             Box(
                 modifier = Modifier
-                    .size(90.dp)
-                    .scale(pulseScale)
+                    .size(88.dp)
+                    .scale(glowScale)
                     .clip(CircleShape)
-                    .background(topicColor.copy(alpha = glowAlpha))
+                    .background(
+                        Brush.radialGradient(listOf(
+                            topicColor.copy(alpha = glowAlpha),
+                            topicColor.copy(alpha = glowAlpha * 0.3f),
+                            Color.Transparent
+                        ))
+                    )
             )
         }
-        
-        // Main circle
+
+        // ── Shadow ring beneath circle ────────────────────────────────────────
+        if (isCompleted || isCurrent) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .shadow(
+                        elevation    = if (isCurrent) 16.dp else 8.dp,
+                        shape        = CircleShape,
+                        ambientColor = topicColor.copy(alpha = 0.55f),
+                        spotColor    = topicColor.copy(alpha = 0.55f)
+                    )
+            )
+        }
+
+        // ── Main circle ───────────────────────────────────────────────────────
         Box(
             modifier = Modifier
-                .size(72.dp)
-                .scale(if (isCurrent) pulseScale else 1f)
-                .shadow(
-                    elevation = if (isCurrent) 12.dp else 4.dp,
-                    shape = CircleShape,
-                    ambientColor = topicColor,
-                    spotColor = topicColor
-                )
+                .size(76.dp)
+                .scale(pressScale)
                 .clip(CircleShape)
-                .background(
-                    when {
-                        isCompleted -> topicColor
-                        isCurrent -> topicColor
-                        isUnlocked -> colors.cardBackground
-                        else -> colors.textSecondary.copy(alpha = 0.2f)
-                    }
-                )
+                .background(fillBrush)
                 .border(
-                    width = 4.dp,
+                    width = when {
+                        isCurrent   -> 3.dp
+                        isCompleted -> 0.dp
+                        else        -> 2.dp
+                    },
                     color = when {
-                        isCompleted -> topicColor.copy(alpha = 0.8f)
-                        isCurrent -> DuoGold
-                        isUnlocked -> topicColor.copy(alpha = 0.5f)
-                        else -> colors.textSecondary.copy(alpha = 0.3f)
+                        isCurrent   -> DuoGold
+                        isCompleted -> Color.Transparent
+                        isUnlocked  -> topicColor.copy(alpha = 0.55f)
+                        else        -> colors.textSecondary.copy(alpha = 0.2f)
                     },
                     shape = CircleShape
                 )
-                .clickable(enabled = isUnlocked || isCurrent) { onClick() },
+                .clickable(
+                    enabled = isUnlocked || isCurrent,
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null
+                ) {
+                    pressed = true
+                    onClick()
+                },
             contentAlignment = Alignment.Center
         ) {
             when {
-                isCompleted -> {
-                    // Checkmark for completed
-                    Text(text = "✓", fontSize = 32.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                }
-                isCurrent -> {
-                    // Play icon for current
-                    Icon(
-                        painter = painterResource(id = com.app.gectyping.R.drawable.icons8_play_96),
-                        contentDescription = "Start",
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-                isUnlocked -> {
-                    // Lesson number
-                    Text(
-                        text = "${lesson.lessonNumber}",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = topicColor
-                    )
-                }
-                else -> {
-                    // Lock for locked
-                    Image(
-                        painter = painterResource(id = com.app.gectyping.R.drawable.icons8_lock_96),
-                        contentDescription = "Locked",
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+                isCompleted -> Text("✓", fontSize = 32.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                isCurrent   -> Icon(
+                    painter       = painterResource(id = com.app.gectyping.R.drawable.icons8_play_96),
+                    contentDescription = "Start",
+                    modifier      = Modifier.size(34.dp),
+                    tint          = Color.White
+                )
+                isUnlocked  -> Text(
+                    text       = "${lesson.lessonNumber}",
+                    fontSize   = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color      = topicColor
+                )
+                else        -> Image(
+                    painter          = painterResource(id = com.app.gectyping.R.drawable.icons8_lock_96),
+                    contentDescription = "Locked",
+                    modifier         = Modifier.size(28.dp)
+                )
             }
         }
-        
-        // Crown indicator for completed lessons
+
+        // ── Crown badge for completed ─────────────────────────────────────────
         if (isCompleted) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .offset(x = 4.dp, y = (-4).dp)
-                    .size(28.dp)
+                    .offset(x = 2.dp, y = 2.dp)
+                    .size(26.dp)
+                    .shadow(4.dp, CircleShape, spotColor = DuoGold)
                     .clip(CircleShape)
                     .background(DuoGold)
                     .border(2.dp, Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "👑", fontSize = 14.sp)
+                Text("👑", fontSize = 13.sp)
             }
+        }
+    }
+
+    // Reset bounce after a short delay
+    LaunchedEffect(pressed) {
+        if (pressed) {
+            kotlinx.coroutines.delay(180)
+            pressed = false
         }
     }
 }
 
 /**
- * Path line connecting lessons
+ * Path line connecting lessons — gradient completed / dashed pending
  */
 @Composable
 private fun PathLine(
@@ -598,22 +644,36 @@ private fun PathLine(
     offsetX: androidx.compose.ui.unit.Dp
 ) {
     val colors = LocalGameColors.current
-    val lineColor = if (isCompleted) topicColor else colors.textSecondary.copy(alpha = 0.3f)
-    
     Canvas(
         modifier = Modifier
             .offset(x = offsetX / 2)
-            .width(8.dp)
-            .height(24.dp)
+            .width(12.dp)
+            .height(28.dp)
     ) {
-        drawLine(
-            color = lineColor,
-            start = Offset(size.width / 2, 0f),
-            end = Offset(size.width / 2, size.height),
-            strokeWidth = 6.dp.toPx(),
-            cap = StrokeCap.Round,
-            pathEffect = if (!isCompleted) PathEffect.dashPathEffect(floatArrayOf(10f, 10f)) else null
-        )
+        if (isCompleted) {
+            // Solid gradient line for completed path
+            drawLine(
+                brush  = Brush.verticalGradient(
+                    colors = listOf(topicColor, topicColor.copy(alpha = 0.55f)),
+                    startY = 0f,
+                    endY   = size.height
+                ),
+                start  = Offset(size.width / 2, 0f),
+                end    = Offset(size.width / 2, size.height),
+                strokeWidth = 7.dp.toPx(),
+                cap    = StrokeCap.Round
+            )
+        } else {
+            // Dashed muted line for locked path
+            drawLine(
+                color  = colors.textSecondary.copy(alpha = 0.25f),
+                start  = Offset(size.width / 2, 0f),
+                end    = Offset(size.width / 2, size.height),
+                strokeWidth = 5.dp.toPx(),
+                cap    = StrokeCap.Round,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
+            )
+        }
     }
 }
 

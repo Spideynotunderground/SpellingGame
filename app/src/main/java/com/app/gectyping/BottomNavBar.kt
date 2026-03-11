@@ -32,7 +32,8 @@ enum class NavTab { HOME, SPELLING, STREAK, SHOP, ACCOUNT, MENU }
 fun BottomNavBar(
     selectedTab: NavTab,
     onTabSelected: (NavTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hasRewardBadge: Boolean = false
 ) {
     val colors = LocalGameColors.current
 
@@ -45,7 +46,7 @@ fun BottomNavBar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NavItemPng(R.drawable.icons8_homepage_96,  "Home",     NavTab.HOME,     selectedTab, onTabSelected)
+        NavItemPng(R.drawable.icons8_homepage_96,  "Home",     NavTab.HOME,     selectedTab, onTabSelected, showBadge = hasRewardBadge)
         NavItemPng(R.drawable.icons8_dyslexia_96,  "Spelling", NavTab.SPELLING, selectedTab, onTabSelected)
         NavItemPng(R.drawable.icons8_fire_96,      "Streak",   NavTab.STREAK,   selectedTab, onTabSelected)
         NavItemPng(R.drawable.icons8_shop_96,      "Shop",     NavTab.SHOP,     selectedTab, onTabSelected)
