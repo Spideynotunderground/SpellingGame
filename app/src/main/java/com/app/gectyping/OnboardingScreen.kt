@@ -327,18 +327,6 @@ private fun NameInputScreen(
 ) {
     val focusManager = LocalFocusManager.current
     
-    // Floating animation for mascot
-    val infiniteTransition = rememberInfiniteTransition(label = "mascot")
-    val floatOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = EaseInOutSine),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "mascotFloat"
-    )
-    
     val scrollState = rememberScrollState()
 
     Column(
@@ -351,37 +339,6 @@ private fun NameInputScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Mascot with glow
-        Box(
-            modifier = Modifier.offset(y = floatOffset.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Glow
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                DuoGreen.copy(alpha = 0.4f),
-                                DuoGreen.copy(alpha = 0.1f),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-            
-            // Owl mascot
-            Image(
-                painter = painterResource(id = R.drawable.icons8_owl_96),
-                contentDescription = "Mascot",
-                modifier = Modifier.size(120.dp)
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
         // Welcome text
         Text(
             text = "What's your name?",

@@ -45,10 +45,10 @@ enum class ThemeWorld(val displayName: String, val iconRes: Int? = null, val emo
     DESERT("Desert",     R.drawable.icons8_desert_plant_96, "🏜️"),
     ICE("Snow",           R.drawable.icons8_snow_96, "❄️"),
 
-    CYBER("Robot",       R.drawable.icons8_bot_96, "🤖"),
+    CYBER("Robot",       R.drawable.icons8_music_robot_96, "🤖"),
     MAGMA("Volcano",       R.drawable.volcano,  "🌋"),
 
-    SAKURA("Sakura",     R.drawable.icons8_flower_96, "🌸");
+    SAKURA("Sakura",     R.drawable.icons8_sakura_96, "🌸");
 
     companion object {
         fun fromId(id: String): ThemeWorld =

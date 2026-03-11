@@ -310,16 +310,16 @@ data class AvatarItem(
 )
 
 val AVATARS = listOf(
-    AvatarItem(id = "space",   title = "Astronaut",     emoji = "🚀", priceDiamonds = 0,   iconRes = R.drawable.icons8_astronaut_helmet_96),
-    AvatarItem(id = "forest",  title = "Forest Elf",    emoji = "🧝", priceDiamonds = 350,  iconRes = R.drawable.elf, isAnimated = true),
-    AvatarItem(id = "ocean",   title = "Deep Diver",    emoji = "🤿", priceDiamonds = 100, iconRes = R.drawable.icons8_snorkel_96),
-    AvatarItem(id = "gaming",  title = "Pro Gamer",     emoji = "🎮", priceDiamonds = 300, iconRes = R.drawable.sonic, isAnimated = true),
-    AvatarItem(id = "desert",  title = "Sand Nomad",    emoji = "🏜", priceDiamonds = 100, iconRes = R.drawable.desert),
-    AvatarItem(id = "cyber",   title = "Cyber Agent",   emoji = "🤖", priceDiamonds = 250, iconRes = R.drawable.pixel_robot, isAnimated = true),
+    AvatarItem(id = "space",   title = "Astronaut",     emoji = "🚀", priceDiamonds = 0,   iconRes = R.drawable.icons8_rocket_64),
     AvatarItem(id = "owl",     title = "Genius Owl",    emoji = "🦉", priceDiamonds = 80,  iconRes = R.drawable.icons8_owl_96),
-    AvatarItem(id = "sakura",  title = "Sakura Spirit", emoji = "🌸", priceDiamonds = 120, iconRes = R.drawable.icons8_flower_96),
+    AvatarItem(id = "ocean",   title = "Deep Diver",    emoji = "🤿", priceDiamonds = 100, iconRes = R.drawable.icons8_snorkel_96),
+    AvatarItem(id = "desert",  title = "Sand Nomad",    emoji = "🏜", priceDiamonds = 100, iconRes = R.drawable.desert),
     AvatarItem(id = "ice",     title = "Ice Walker",    emoji = "❄",  priceDiamonds = 100, iconRes = R.drawable.icons8_snowflake_96),
+    AvatarItem(id = "sakura",  title = "Sakura Spirit", emoji = "🌸", priceDiamonds = 120, iconRes = R.drawable.icons8_flower_96),
     AvatarItem(id = "magma",   title = "Volcano Lord",  emoji = "🌋", priceDiamonds = 150, iconRes = R.drawable.volcano),
+    AvatarItem(id = "cyber",   title = "Cyber Agent",   emoji = "🤖", priceDiamonds = 250, iconRes = R.drawable.pixel_robot, isAnimated = true),
+    AvatarItem(id = "gaming",  title = "Pro Gamer",     emoji = "🎮", priceDiamonds = 300, iconRes = R.drawable.sonic, isAnimated = true),
+    AvatarItem(id = "forest",  title = "Forest Elf",    emoji = "🧝", priceDiamonds = 350,  iconRes = R.drawable.elf, isAnimated = true),
 )
 
 fun avatarById(id: String): AvatarItem =
@@ -352,8 +352,7 @@ fun SpellingGameScreen(
     var ttsRate by remember { mutableFloatStateOf(prefs.getFloat("tts_rate", 1.0f)) }
     var showSettings by remember { mutableStateOf(false) }
 
-    // 🏁 Screen flow: SplashScreen → NameDialog → MainMenu → LoadingScreen → Game
-    var showSplash by remember { mutableStateOf(true) }
+    // 🏁 Screen flow: NameDialog → MainMenu → LoadingScreen → Game
     var isOnline by remember { mutableStateOf(true) }
 
     // Check connectivity on every resume
@@ -1501,10 +1500,6 @@ fun SpellingGameScreen(
             )
         }
 
-        // 🎬 Splash video (shown once per app launch)
-        if (showSplash) {
-            SplashScreen(onComplete = { showSplash = false })
-        }
 
         // 🌐 No internet overlay — blocks everything until connection restored
         if (!isOnline) {
@@ -1512,7 +1507,7 @@ fun SpellingGameScreen(
         }
 
         // Onboarding screen (first-time entry) - BOG style
-        if (!showSplash && showNameDialog) {
+        if (showNameDialog) {
             OnboardingScreen(
                 onComplete = { finalName ->
                     val cleaned = finalName.trim().take(24)
@@ -1526,7 +1521,7 @@ fun SpellingGameScreen(
         }
 
         // 🏁 Main Menu overlay (center hub — shown after name dialog or on returning visit)
-        if (!showSplash && !showNameDialog && showMainMenu) {
+        if (!showNameDialog && showMainMenu) {
             MainMenuScreen(
                 context = context,
                 playerName = playerName,
